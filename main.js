@@ -106,7 +106,10 @@ async function main() {
     else if(modifyOperation == '2'){
         await removeSongsFromModifyPlaylist(page);        // remove songs
     }
-
+    else{
+        await addSongsToModifyPlaylist(page);             // add songs
+        await removeSongsFromModifyPlaylist(page);           // remove songs
+    }
 
     await page.waitForTimeout(1000);
     await browser.close();
