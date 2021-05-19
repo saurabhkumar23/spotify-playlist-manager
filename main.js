@@ -103,6 +103,10 @@ async function main() {
     else if(modifyOperation == '1'){
         await addSongsToModifyPlaylist(page);          // add songs 
     }
+    else if(modifyOperation == '2'){
+        await removeSongsFromModifyPlaylist(page);        // remove songs
+    }
+
 
     await page.waitForTimeout(1000);
     await browser.close();
@@ -209,4 +213,60 @@ async function addSongsToModifyPlaylist(page){
     for(let i=0;i<noOfSongsToAdd;i++){
         await addSongToPlaylist(page,songsToAdd[i]);
     }
+}
+
+async function removeSongsFromModifyPlaylist(page){
+    // go to search 
+    await page.waitForSelector('.icon.search-icon',{
+        visible:true
+    });
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('.icon.search-icon'),             
+    ]);
+
+    // type your playlist in search bar
+    await page.waitForSelector('[role="search"] input',{
+        visible:true
+    });
+    await page.click('[role="search"] input');
+    await page.type('[role="search"] input',modifyPlaylist,{delay:200});
+
+    // go to playlist div
+    await page.waitForSelector('._85fec37a645444db871abd5d31db7315-scss',{
+        visible:true
+    });
+    await page.click('._85fec37a645444db871abd5d31db7315-scss');
+
+    // make your input array to lowerCase for filtering purpose
+    for(let item in songsToRemove){
+        songsToRemove[item] = songsToRemove[item].toLowerCase();
+    }
+
+    await page.waitForSelector('[data-testid="playlist-tracklist"]  .c27f49a483c85a5b88b3f37fb918e497-scss > [role="presentation"] .da0bc4060bb1bdb4abb8e402916af32e-scss.standalone-ellipsis-one-line._8a9c5cc886805907de5073b8ebc3acd8-scss',{
+        visible:true
+    });
+    let currentSongs = await page.$$eval('[data-testid="playlist-tracklist"]  .c27f49a483c85a5b88b3f37fb918e497-scss > [role="presentation"] .da0bc4060bb1bdb4abb8e402916af32e-scss.standalone-ellipsis-one-line._8a9c5cc886805907de5073b8ebc3acd8-scss', songs => songs.map(song => song.textContent.toLowerCase()));
+
+    for(let i=currentSongs.length-1;i>=0;i--){
+        if(songsToRemove.includes(currentSongs[i]) == true){
+            await page.waitForTimeout(500);
+            await removeSongFromPlaylist(page,i);
+        }
+    }
+}
+
+async function removeSongFromPlaylist(page,index){
+    await page.waitForTimeout(500)
+    // click 'more' button of that particular song
+    await page.waitForSelector(`[data-testid="playlist-tracklist"]  .c27f49a483c85a5b88b3f37fb918e497-scss > [role="presentation"] [role="row"]:nth-of-type(${index+1})  [aria-label="More"]`,{
+        visible:true
+    });
+    await page.click(`[data-testid="playlist-tracklist"]  .c27f49a483c85a5b88b3f37fb918e497-scss > [role="presentation"] [role="row"]:nth-of-type(${index+1})  [aria-label="More"]`);
+    
+    await page.waitForTimeout(500);
+
+    // click 'remove from this playlist'
+    await page.waitForSelector('#context-menu ul li:nth-of-type(7)');
+    await page.click('#context-menu ul li:nth-of-type(7)');
 }
