@@ -93,7 +93,14 @@ async function main() {
     // enter credentials
     await fillCredentials(page);
 
-    
+    if(operation == '1'){
+        await createPlaylist(page);                    // create playlist
+
+
+    }
+
+
+    await page.waitForTimeout(1000);
     await browser.close();
 
 }
@@ -117,4 +124,34 @@ async function fillCredentials(page){
     await page.type('#login-username', user,{delay:50});
     await page.type('#login-password', pwd,{delay:50});
     await page.click("#login-button");
+}
+
+async function createPlaylist(page){
+    // create playlist button
+    await page.waitForSelector('[data-testid="create-playlist-button"]', {
+        visible: true
+    });
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('[data-testid="create-playlist-button"]'),             
+    ]);
+
+    // click playlist name
+    await page.waitForSelector('.a12b67e576d73f97c44f1f37026223c4-scss',{
+        visible: true
+    });
+    await page.click('.a12b67e576d73f97c44f1f37026223c4-scss')
+
+    // fill playlist name input field
+    await page.waitForSelector('[data-testid="playlist-edit-details-name-input"]',{
+        visible: true
+    });
+    await page.click('[data-testid="playlist-edit-details-name-input"]',{clickCount:3});
+    await page.type('[data-testid="playlist-edit-details-name-input"]',newPlaylist);
+
+    // save that input field button
+    await page.waitForSelector('[data-testid="playlist-edit-details-save-button"]',{
+        visible:true
+    });
+    await page.click('[data-testid="playlist-edit-details-save-button"]');
 }
