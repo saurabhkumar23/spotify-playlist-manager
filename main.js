@@ -95,7 +95,9 @@ async function main() {
 
     if(operation == '1'){
         await createPlaylist(page);                    // create playlist
-
+        for(let i=0;i<noOfSongsToAdd;i++){
+            await addSongToPlaylist(page,songsToAdd[i]);         // add songs
+        }
 
     }
 
@@ -154,4 +156,21 @@ async function createPlaylist(page){
         visible:true
     });
     await page.click('[data-testid="playlist-edit-details-save-button"]');
+}
+
+async function addSongToPlaylist(page,song){
+    // type song in search bar
+    await page.waitForSelector('._655bc45ccbf3d91c685865ff470892eb-scss.f3fc214b257ae2f1d43d4c594a94497f-scss',{
+        visible:true
+    });
+    await page.click('._655bc45ccbf3d91c685865ff470892eb-scss.f3fc214b257ae2f1d43d4c594a94497f-scss',{clickCount:3})
+    await page.type('._655bc45ccbf3d91c685865ff470892eb-scss.f3fc214b257ae2f1d43d4c594a94497f-scss',song,{delay:200});
+
+    await page.waitForTimeout(500);
+
+    // add song button
+    await page.waitForSelector('._3f37264be67c8f40fa9f76449afdb4bd-scss._110dbc41d89af63f97cdd8b7cd7fea47-scss._2e6fd4bdb936691a0eceb04a1e880c2f-scss',{
+        visible:true
+    });
+    await page.click('._3f37264be67c8f40fa9f76449afdb4bd-scss._110dbc41d89af63f97cdd8b7cd7fea47-scss._2e6fd4bdb936691a0eceb04a1e880c2f-scss');
 }
