@@ -77,3 +77,44 @@ else{
         main();
     }
 }
+
+async function main() {
+
+    const browser = await puppeteer.launch({
+        headless: false,
+        defaultViewport: null,
+        slowMo: 20,
+        args: ['--start-fullscreen', '--disable-notifications', '--incognito']
+    });
+
+    let pages = await browser.pages();
+    let page = pages[0];
+
+    // enter credentials
+    await fillCredentials(page);
+
+    
+    await browser.close();
+
+}
+
+async function fillCredentials(page){
+    // open spotify website
+    page.goto('https://open.spotify.com', {
+        waitUntil: 'networkidle2'
+    });
+
+    // Login
+    await page.waitForSelector("._3f37264be67c8f40fa9f76449afdb4bd-scss._1f2f8feb807c94d2a0a7737b433e19a8-scss", {
+        visible: true
+    });
+    await page.click("._3f37264be67c8f40fa9f76449afdb4bd-scss._1f2f8feb807c94d2a0a7737b433e19a8-scss");
+
+    // writing credentials
+    await page.waitForSelector('#login-username', {
+        visible: true
+    });
+    await page.type('#login-username', user,{delay:50});
+    await page.type('#login-password', pwd,{delay:50});
+    await page.click("#login-button");
+}
