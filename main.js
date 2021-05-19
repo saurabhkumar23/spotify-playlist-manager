@@ -15,3 +15,8 @@ let pwd;
 let operation;
 let modifyOperation;
 let appDB = [];
+
+// ask for spotify credentials
+user = readline.question('Give your spotify email: ')
+pwd = readline.question('Give your spotify password: ')
+console.log('------------------------------------')
