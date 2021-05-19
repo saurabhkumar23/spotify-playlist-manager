@@ -100,7 +100,9 @@ async function main() {
         }
 
     }
-
+    else if(modifyOperation == '1'){
+        await addSongsToModifyPlaylist(page);          // add songs 
+    }
 
     await page.waitForTimeout(1000);
     await browser.close();
@@ -173,4 +175,38 @@ async function addSongToPlaylist(page,song){
         visible:true
     });
     await page.click('._3f37264be67c8f40fa9f76449afdb4bd-scss._110dbc41d89af63f97cdd8b7cd7fea47-scss._2e6fd4bdb936691a0eceb04a1e880c2f-scss');
+}
+
+async function addSongsToModifyPlaylist(page){
+    // go to search 
+    await page.waitForSelector('.icon.search-icon',{
+        visible:true
+    });
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('.icon.search-icon'),             
+    ]);
+
+    // type your playlist in search bar
+    await page.waitForSelector('[role="search"] input',{
+        visible:true
+    });
+    await page.click('[role="search"] input');
+    await page.type('[role="search"] input',modifyPlaylist,{delay:200});
+
+    // go to playlist div
+    await page.waitForSelector('._85fec37a645444db871abd5d31db7315-scss',{
+        visible:true
+    });
+    await page.click('._85fec37a645444db871abd5d31db7315-scss');
+
+    // go to 'find more' button
+    await page.waitForSelector('._1de06189bc33bb25805c19bdbc99664e-scss',{
+        visible:true
+    });
+    await page.click('._1de06189bc33bb25805c19bdbc99664e-scss');
+
+    for(let i=0;i<noOfSongsToAdd;i++){
+        await addSongToPlaylist(page,songsToAdd[i]);
+    }
 }
