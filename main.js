@@ -20,3 +20,11 @@ let appDB = [];
 user = readline.question('Give your spotify email: ')
 pwd = readline.question('Give your spotify password: ')
 console.log('------------------------------------')
+
+// ask for operation
+operation = readline.question('Choose your operation:\n1. Create new playlist and add songs. \n2. Modify your current playlist (add or remove songs from it) \n')
+console.log('------------------------------------')
+if(operation !=  '1' && operation != '2'){
+    console.log('Sorry, we have only these operations available. choose correct option :)')
+    process.exit()
+}
