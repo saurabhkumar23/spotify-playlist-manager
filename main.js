@@ -18,6 +18,10 @@ let operation;
 let modifyOperation;
 let appDB = [];
 
+// update playlist data from DB.
+appDB = fs.readFileSync("data.json","utf8")
+appDB = JSON.parse(appDB)
+
 // ask for spotify credentials
 user = readline.question('Give your spotify email: ')
 pwd = readline.question('Give your spotify password: ')
@@ -32,6 +36,12 @@ if(operation !=  '1' && operation != '2'){
 }
 else if(operation == '1'){
     newPlaylist = readline.question('Give your playlist name: ')
+    for(let item in appDB){
+        if(appDB[item][newPlaylist]){               //if that playlist exists
+            console.log("same name playlist already exists..")
+            process.exit()
+        }
+    }
     noOfSongsToAdd = readline.question('How many songs you want to add: ')
     console.log('------------------------------------')
     for(let i=0;i<noOfSongsToAdd;i++){
@@ -41,6 +51,17 @@ else if(operation == '1'){
 }
 else{
     modifyPlaylist = readline.question('Give your playlist name: ')
+    let isFound = false;
+    for(let item in appDB){
+        if(appDB[item][modifyPlaylist]){               //check if playlist exists
+            isFound = true;
+            break;
+        }
+    }
+    if(!isFound){
+        console.log("please give name of existing playlist.")
+        process.exit()
+    }
     console.log('------------------------------------')
     modifyOperation = readline.question('Choose your operation:\n1. Add new songs. \n2. Remove songs. \n3. Add and Remove both.\n')
     console.log('------------------------------------')
@@ -59,6 +80,7 @@ else{
     else if(modifyOperation == '2'){
         noOfSongsToRemove = readline.question('How many songs you want to remove: ')
         console.log('------------------------------------')
+        console.log('try to give names exactly mention in your playlist on website.')
         for(let i=0;i<noOfSongsToRemove;i++){
             songsToRemove[i] = readline.question(`${i+1}. `)
         }
@@ -73,6 +95,7 @@ else{
         console.log('------------------------------------')
         noOfSongsToRemove = readline.question('How many songs you want to remove: ')
         console.log('------------------------------------')
+        console.log('try to give names exactly mention in your playlist on website.')
         for(let i=0;i<noOfSongsToRemove;i++){
             songsToRemove[i] = readline.question(`${i+1}. `)
         }
@@ -100,22 +123,69 @@ async function main() {
         for(let i=0;i<noOfSongsToAdd;i++){
             await addSongToPlaylist(page,songsToAdd[i]);         // add songs
         }
-
+        let newPlayObj = {                   // saving new playlist and the songs in DB.
+            [newPlaylist] : songsToAdd
+        }
+        appDB.push(newPlayObj)
+        fs.writeFileSync("data.json",JSON.stringify(appDB))
+        console.log('done successfully!... check data.json file.')
     }
     else if(modifyOperation == '1'){
-        await addSongsToModifyPlaylist(page);          // add songs 
+        await addSongsToModifyPlaylist(page);          // add songs
+        for(let item in appDB){                                     // saving changes to DB.
+            if(appDB[item][modifyPlaylist]){              
+                for(let song in songsToAdd){
+                    appDB[item][modifyPlaylist].push(songsToAdd[song])
+                }
+                fs.writeFileSync("data.json",JSON.stringify(appDB))
+                console.log('done successfully!... check data.json file.')
+                break
+            }
+        }
     }
     else if(modifyOperation == '2'){
         await removeSongsFromModifyPlaylist(page);        // remove songs
+        for(let item in appDB){                                     // saving changes to DB.
+            if(appDB[item][modifyPlaylist]){              
+                for(let song in songsToRemove){
+                    let index = appDB[item][modifyPlaylist].indexOf(songsToRemove[song]);
+                    if (index > -1) {
+                        appDB[item][modifyPlaylist].splice(index,1)
+                    }
+                }
+                fs.writeFileSync("data.json",JSON.stringify(appDB))
+                console.log('done successfully!... check data.json file.')
+                break
+            }
+        }
     }
     else{
         await addSongsToModifyPlaylist(page);             // add songs
+        for(let item in appDB){                                     // saving changes to DB.
+            if(appDB[item][modifyPlaylist]){              
+                for(let song in songsToAdd){
+                    appDB[item][modifyPlaylist].push(songsToAdd[song])
+                }
+                fs.writeFileSync("data.json",JSON.stringify(appDB))
+                console.log('done successfully!... check data.json file.')
+                break
+            }
+        }
         await removeSongsFromModifyPlaylist(page);           // remove songs
+        for(let item in appDB){                                     // saving changes to DB.
+            if(appDB[item][modifyPlaylist]){              
+                for(let song in songsToRemove){
+                    let index = appDB[item][modifyPlaylist].indexOf(songsToRemove[song]);
+                    if (index > -1) {
+                        appDB[item][modifyPlaylist].splice(index,1)
+                    }
+                }
+                fs.writeFileSync("data.json",JSON.stringify(appDB))
+                console.log('done successfully!... check data.json file.')
+                break
+            }
+        }
     }
-
-    await page.waitForTimeout(1000);
-    await browser.close();
-
 }
 
 async function fillCredentials(page){
@@ -160,7 +230,7 @@ async function createPlaylist(page){
         visible: true
     });
     await page.click('[data-testid="playlist-edit-details-name-input"]',{clickCount:3});
-    await page.type('[data-testid="playlist-edit-details-name-input"]',newPlaylist);
+    await page.type('[data-testid="playlist-edit-details-name-input"]',newPlaylist,{delay:200});
 
     // save that input field button
     await page.waitForSelector('[data-testid="playlist-edit-details-save-button"]',{
@@ -175,7 +245,7 @@ async function addSongToPlaylist(page,song){
         visible:true
     });
     await page.click('._655bc45ccbf3d91c685865ff470892eb-scss.f3fc214b257ae2f1d43d4c594a94497f-scss',{clickCount:3})
-    await page.type('._655bc45ccbf3d91c685865ff470892eb-scss.f3fc214b257ae2f1d43d4c594a94497f-scss',song,{delay:200});
+    await page.type('._655bc45ccbf3d91c685865ff470892eb-scss.f3fc214b257ae2f1d43d4c594a94497f-scss',song,{delay:300});
 
     await page.waitForTimeout(500);
 
@@ -201,7 +271,7 @@ async function addSongsToModifyPlaylist(page){
         visible:true
     });
     await page.click('[role="search"] input');
-    await page.type('[role="search"] input',modifyPlaylist,{delay:200});
+    await page.type('[role="search"] input',modifyPlaylist,{delay:300});
 
     // go to playlist div
     await page.waitForSelector('._85fec37a645444db871abd5d31db7315-scss',{
@@ -235,7 +305,7 @@ async function removeSongsFromModifyPlaylist(page){
         visible:true
     });
     await page.click('[role="search"] input');
-    await page.type('[role="search"] input',modifyPlaylist,{delay:200});
+    await page.type('[role="search"] input',modifyPlaylist,{delay:300});
 
     // go to playlist div
     await page.waitForSelector('._85fec37a645444db871abd5d31db7315-scss',{
