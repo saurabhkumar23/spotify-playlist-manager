@@ -24,7 +24,7 @@ appDB = JSON.parse(appDB)
 
 // ask for spotify credentials
 user = readline.question('Give your spotify email: ')
-pwd = readline.question('Give your spotify password: ')
+pwd = readline.question('Give your spotify password: ',{hideEchoBack: true })
 console.log('------------------------------------')
 
 // ask for operation

@@ -17,6 +17,7 @@ Open your Terminal/Command in the directory for the project and run these comman
 
 ## Usage
 - run this command on your terminal:
+    - npm link
     - $spotify-manage
 - give your spotify credentials.
 - choose your operation. 
